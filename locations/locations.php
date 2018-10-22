@@ -47,6 +47,8 @@ class Locations {
 		ob_start(); ?>
 
 		<div id="location-meta">
+			<?php wp_nonce_field('specify-location', 'location-altitude'); ?>
+
 			<label for="location-meta-lat"><?php _e('Latitude', 'developer-challenge-wordpress-plugin'); ?></label>
 			<input type="number" step="0.000001" min="-90.000000" max="90.000000" name="locationLat" id="location-meta-lat" value="<?php echo esc_attr($lat); ?>" required>
 			<label for="location-meta-lng"><?php _e('Longitude', 'developer-challenge-wordpress-plugin'); ?></label>
