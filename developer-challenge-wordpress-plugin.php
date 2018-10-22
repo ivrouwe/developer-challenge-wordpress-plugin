@@ -15,4 +15,5 @@ Domain Path:  /languages
 
 require_once('locations/locations.php');
 
-new Locations();
+$locations = new Locations();
+$locations->initialize_plugin();

@@ -10,6 +10,33 @@ class Locations {
 		);
 	}
 
+	public function initialize_plugin() {
+		if(!post_type_exists(__('locations', 'developer-challenge-wordpress-plugin'))) {
+			// Register the Locations post type
+			add_action('init', array($this, 'register_locations'));
+
+			// Modify the "Enter title here" placeholder text
+			add_filter('enter_title_here', function () {
+				$screen = get_current_screen();
+
+				if ($screen->post_type == _x('locations', 'post type slug', 'developer-challenge-wordpress-plugin')) {
+
+					$title = _x('Enter Location name here', 'title placeholder text (on edit screen)', 'developer-challenge-wordpress-plugin');
+				}
+
+				return $title;
+			});
+
+			// Add custom fields
+			add_action('add_meta_boxes', array($this, 'add_locations_meta_box'));
+
+			// Sanitize and save the custom field values when a Location is added/updated
+			add_action('save_post_locations', array($this, 'update_location'), 100, 1);
+		} else {
+			return;
+		}
+	}
+
 	public function locations_meta_box_html() {
 		global $post;
 
@@ -60,52 +87,27 @@ class Locations {
 	public function update_location() {
 		global $post;
 
-		$floats = array(
-			'locationLat' => $_POST['locationLat'],
-			'locationLng' => $_POST['locationLng'],
-		);
+		if (!empty($_POST) && check_admin_referer('specify-location', 'location-altitude')) {
+			$floats = array(
+				'locationLat' => $_POST['locationLat'],
+				'locationLng' => $_POST['locationLng'],
+			);
 
-		$ints = array(
-			'locationZoom' => $_POST['locationZoom'],
-		);
+			$ints = array(
+				'locationZoom' => $_POST['locationZoom'],
+			);
 
-		foreach($floats as $key => $value) {
-			if(filter_var($value, FILTER_VALIDATE_FLOAT) !== '') {
-				update_post_meta($post->ID, $key, filter_var($value, FILTER_VALIDATE_FLOAT));
-			}
-		}
-
-		foreach($ints as $key => $value) {
-			if(filter_var($value, FILTER_VALIDATE_INT) !== '') {
-				update_post_meta($post->ID, $key, filter_var($value, FILTER_VALIDATE_INT));
-			}
-		}
-	}
-
-	public function __construct() {
-		if(!post_type_exists(__('locations', 'developer-challenge-wordpress-plugin'))) {
-			// Register the Locations post type
-			add_action('init', array($this, 'register_locations'));
-
-			// Modify the "Enter title here" placeholder text
-			add_filter('enter_title_here', function () {
-				$screen = get_current_screen();
-
-				if ($screen->post_type == _x('locations', 'post type slug', 'developer-challenge-wordpress-plugin')) {
-
-					$title = _x('Enter Location name here', 'title placeholder text (on edit screen)', 'developer-challenge-wordpress-plugin');
+			foreach($floats as $key => $value) {
+				if(filter_var($value, FILTER_VALIDATE_FLOAT) !== '') {
+					update_post_meta($post->ID, $key, filter_var($value, FILTER_VALIDATE_FLOAT));
 				}
+			}
 
-				return $title;
-			});
-
-			// Add custom fields
-			add_action('add_meta_boxes', array($this, 'add_locations_meta_box'));
-
-			// Sanitize and save the custom field values when a Location is added/updated
-			add_action('save_post_locations', array($this, 'update_location'), 100, 1);
-		} else {
-			return;
+			foreach($ints as $key => $value) {
+				if(filter_var($value, FILTER_VALIDATE_INT) !== '') {
+					update_post_meta($post->ID, $key, filter_var($value, FILTER_VALIDATE_INT));
+				}
+			}
 		}
 	}
 }
