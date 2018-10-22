@@ -10,6 +10,14 @@ class Locations {
 		);
 	}
 
+	public function enqueue_locations_script($hook) {
+		if (!in_array($hook, array('post.php', 'post-new.php'))) {
+			return;
+		}
+
+		wp_enqueue_script('locations-admin-script', plugins_url('../assets/js/locations-admin-ui-enhancements.js', __FILE__));
+	}
+
 	public function initialize_plugin() {
 		if(!post_type_exists(__('locations', 'developer-challenge-wordpress-plugin'))) {
 			// Register the Locations post type
@@ -32,6 +40,9 @@ class Locations {
 
 			// Sanitize and save the custom field values when a Location is added/updated
 			add_action('save_post_locations', array($this, 'update_location'), 100, 1);
+
+			// Add Google Maps UI to meta box
+			add_action('admin_enqueue_scripts', array($this, 'enqueue_locations_script'));
 		} else {
 			return;
 		}
